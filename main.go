@@ -66,4 +66,34 @@ func main() {
 			panic(err)
 		}
 	}
+
+	parent, errP := db1.Prepare("INSERT INTO `parent` VALUES ()")
+	if errP != nil {
+		panic(errP)
+	}
+	defer func() { _ = parent.Close() }()
+
+	child, errC := db2.Prepare("INSERT INTO `child`(`id`) VALUES (?)")
+	if errC != nil {
+		panic(errC)
+	}
+	defer func() { _ = child.Close() }()
+
+	for {
+		result, errP := parent.Exec()
+		if errP != nil {
+			panic(errP)
+		}
+
+		id, errLI := result.LastInsertId()
+		if errLI != nil {
+			panic(errLI)
+		}
+
+		if _, err := child.Exec(id); err != nil {
+			panic(err)
+		}
+
+		println(id)
+	}
 }
