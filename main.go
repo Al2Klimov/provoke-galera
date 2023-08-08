@@ -1,8 +1,11 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
 	_ "github.com/go-sql-driver/mysql"
+	"net"
+	"net/url"
 )
 
 func main() {
@@ -32,4 +35,24 @@ func main() {
 	if *pass == "" {
 		panic("-pass missing")
 	}
+
+	db1, err1 := sql.Open("mysql", (&url.URL{
+		User: url.UserPassword(*user, *pass),
+		Host: "tcp(" + net.JoinHostPort(*host1, "3306") + ")",
+		Path: "/" + *db,
+	}).String()[2:])
+	if err1 != nil {
+		panic(err1)
+	}
+	defer func() { _ = db1.Close() }()
+
+	db2, err2 := sql.Open("mysql", (&url.URL{
+		User: url.UserPassword(*user, *pass),
+		Host: "tcp(" + net.JoinHostPort(*host2, "3306") + ")",
+		Path: "/" + *db,
+	}).String()[2:])
+	if err2 != nil {
+		panic(err2)
+	}
+	defer func() { _ = db2.Close() }()
 }
