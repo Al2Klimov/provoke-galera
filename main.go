@@ -2,11 +2,16 @@ package main
 
 import (
 	"database/sql"
+	_ "embed"
 	"flag"
 	_ "github.com/go-sql-driver/mysql"
 	"net"
 	"net/url"
+	"strings"
 )
+
+//go:embed schema.sql
+var schema string
 
 func main() {
 	host1 := flag.String("host1", "", "HOST")
@@ -55,4 +60,10 @@ func main() {
 		panic(err2)
 	}
 	defer func() { _ = db2.Close() }()
+
+	for _, ddl := range strings.Split(strings.Trim(strings.TrimSpace(schema), ";"), ";") {
+		if _, err := db1.Exec(ddl); err != nil {
+			panic(err)
+		}
+	}
 }
