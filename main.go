@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	_ "embed"
 	"flag"
+	"github.com/go-sql-driver/mysql"
 	_ "github.com/go-sql-driver/mysql"
 	"net"
 	"net/url"
@@ -90,8 +91,16 @@ func main() {
 			panic(errLI)
 		}
 
-		if _, err := child.Exec(id); err != nil {
-			panic(err)
+		for {
+			if _, err := child.Exec(id); err != nil {
+				if me, ok := err.(*mysql.MySQLError); ok && me.Number == 1213 {
+					continue
+				}
+
+				panic(err)
+			}
+
+			break
 		}
 
 		println(id)
