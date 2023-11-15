@@ -56,6 +56,7 @@ func main() {
 		User: url.UserPassword(*user, *pass),
 		Host: "tcp(" + net.JoinHostPort(*host2, "3306") + ")",
 		Path: "/" + *db,
+		//RawQuery: "wsrep_sync_wait=4",
 	}).String()[2:])
 	if err2 != nil {
 		panic(err2)
